@@ -12,7 +12,7 @@ Family-wide filings live in the Commons exchange; repo-local IDs are preserved t
 - **Severity:** major
 - **Status:** open, workaround in all DSP kernels
 - **Owner candidate:** `mncs-language` (research CLI resolver)
-- **Commons record:** `MNCS-TOOLING-<filed at campaign end>` (legacyId `mncs-signal:SIG-PRESS-001`)
+- **Commons record:** `MNCS-TOOLING-E5AE988B197F` (legacyId `mncs-signal:SIG-PRESS-001`)
 
 **Workload:** any kernel importing `mncs.math.*`/`mncs.numerics.*` executed
 via `mncs experiment run`.
