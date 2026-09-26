@@ -1,0 +1,549 @@
+{
+ "schema_version": "0.1",
+ "name": "signal-types",
+ "cases": [
+  {
+   "id": "desc-ok",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.types",
+     "function": "validate_descriptor"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 44100,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 2,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 1024,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:mncs.signal.types::SignalStatus",
+      "variant_identity": "mncs:0.2:finite-variant:mncs.signal.types::SignalStatus::Ok",
+      "discriminant": 0
+     }
+    }
+   ]
+  },
+  {
+   "id": "desc-rate",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.types",
+     "function": "validate_descriptor"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 2,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 1024,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:mncs.signal.types::SignalStatus",
+      "variant_identity": "mncs:0.2:finite-variant:mncs.signal.types::SignalStatus::BadRate",
+      "discriminant": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "desc-channels",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.types",
+     "function": "validate_descriptor"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 48000,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 512,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:mncs.signal.types::SignalStatus",
+      "variant_identity": "mncs:0.2:finite-variant:mncs.signal.types::SignalStatus::BadChannels",
+      "discriminant": 2
+     }
+    }
+   ]
+  },
+  {
+   "id": "desc-length",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.types",
+     "function": "validate_descriptor"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 48000,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 1,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:mncs.signal.types::SignalStatus",
+      "variant_identity": "mncs:0.2:finite-variant:mncs.signal.types::SignalStatus::BadLength",
+      "discriminant": 3
+     }
+    }
+   ]
+  },
+  {
+   "id": "desc-priority",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.types",
+     "function": "validate_descriptor"
+    },
+    "arguments": [
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     },
+     {
+      "integer": {
+       "value": 0,
+       "type": {
+        "bits": 64,
+        "signed": false
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "finite": {
+      "type_identity": "mncs:0.2:finite-type:mncs.signal.types::SignalStatus",
+      "variant_identity": "mncs:0.2:finite-variant:mncs.signal.types::SignalStatus::BadRate",
+      "discriminant": 1
+     }
+    }
+   ]
+  },
+  {
+   "id": "cadd-re",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.types",
+     "function": "c_add_re"
+    },
+    "arguments": [
+     {
+      "float": {
+       "bits": 4609434218613702656,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4612811918334230528,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4614500768194494464,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4617034042984890368,
+       "type": {
+        "bits": 64
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "float": {
+      "bits": 4617034042984890368,
+      "type": {
+       "bits": 64
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "cadd-im",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.types",
+     "function": "c_add_im"
+    },
+    "arguments": [
+     {
+      "float": {
+       "bits": 4609434218613702656,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4612811918334230528,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4614500768194494464,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4617034042984890368,
+       "type": {
+        "bits": 64
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "float": {
+      "bits": 4619848792751996928,
+      "type": {
+       "bits": 64
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "cmul-re",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.types",
+     "function": "c_mul_re"
+    },
+    "arguments": [
+     {
+      "float": {
+       "bits": 4607182418800017408,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4611686018427387904,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4613937818241073152,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4616189618054758400,
+       "type": {
+        "bits": 64
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "float": {
+      "bits": 13840687554816376832,
+      "type": {
+       "bits": 64
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "cmul-im",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.types",
+     "function": "c_mul_im"
+    },
+    "arguments": [
+     {
+      "float": {
+       "bits": 4607182418800017408,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4611686018427387904,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4613937818241073152,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4616189618054758400,
+       "type": {
+        "bits": 64
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "float": {
+      "bits": 4621819117588971520,
+      "type": {
+       "bits": 64
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "cconj-im",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.types",
+     "function": "c_conj_im"
+    },
+    "arguments": [
+     {
+      "float": {
+       "bits": 4613937818241073152,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 13840124604862955520,
+       "type": {
+        "bits": 64
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "float": {
+      "bits": 4616752568008179712,
+      "type": {
+       "bits": 64
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "cnorm2",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.types",
+     "function": "c_norm2_flat"
+    },
+    "arguments": [
+     {
+      "float": {
+       "bits": 4613937818241073152,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4616189618054758400,
+       "type": {
+        "bits": 64
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "float": {
+      "bits": 4627730092099895296,
+      "type": {
+       "bits": 64
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

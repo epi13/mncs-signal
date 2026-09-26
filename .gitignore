@@ -1,0 +1,12 @@
+# Editor / OS
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Python caches
+__pycache__/
+*.pyc
+
+# Tool cache
+.mncs/

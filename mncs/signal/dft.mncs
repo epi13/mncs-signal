@@ -1,0 +1,175 @@
+mncs 0.18;
+
+// mncs.signal.dft — discrete Fourier transforms over complex f64.
+//
+// DFT4 is exact: 4th roots of unity are {1, -i, -1, i}, so no libm call
+// appears and every corpus case asserts exact bits. DFT8/FFT8 over real
+// inputs use host-libm twiddles (bare sin/cos); general-input
+// cases therefore assert through tolerance-window entries, while
+// impulse/DC cases remain exact.
+//
+// Corpus entry points take flat scalars (real-input DFT8 assumes zero
+// imaginary part — the dominant DSP case — keeping arity in bounds).
+// Twiddle-index reduction is an explicit bounded ladder, never a modulo
+// operator: valid for the stated input ranges only.
+module mncs.signal.dft;
+
+use mncs.signal.types;
+
+// ---- bounded index reduction (no modulo operator in the language) ----
+
+// Valid for v < 8. Twiddle phases only ever need (m*k) mod 4 with m,k < 4.
+fn mod4_small(v: u64) -> (result: u64) {
+    if v >= 8 {
+        return v - 8;
+    }
+    if v >= 4 {
+        return v - 4;
+    }
+    return v;
+}
+
+// Valid for v < 16. Real-input DFT8 needs (m*k) mod 8 with m,k < 8.
+fn mod8_small(v: u64) -> (result: u64) {
+    if v >= 16 {
+        return v - 16;
+    }
+    if v >= 8 {
+        return v - 8;
+    }
+    return v;
+}
+
+// Exact 4th-root twiddles. p selects W4^p with W4 = -i.
+fn tw4_re(p: u64) -> (result: f64) {
+    if p == 0 {
+        return 1.0;
+    }
+    if p == 1 {
+        return 0.0;
+    }
+    if p == 2 {
+        return 0.0 - 1.0;
+    }
+    return 0.0;
+}
+
+fn tw4_im(p: u64) -> (result: f64) {
+    if p == 0 {
+        return 0.0;
+    }
+    if p == 1 {
+        return 0.0 - 1.0;
+    }
+    if p == 2 {
+        return 0.0;
+    }
+    return 1.0;
+}
+
+// Host-libm 8th-root twiddles (bare sin/cos intrinsics: no import needed,
+// and cross-repo imports do not resolve on the experiment-run path). Angle is exact f64 arithmetic; the sin/cos
+// evaluation is host libm, so callers needing bits use exact-case inputs
+// (impulse/DC) and tolerance windows otherwise.
+fn tw8_angle(mk: u64) -> (result: f64) {
+    let p: f64 = mod8_small(mk) as f64;
+    return 0.0 - 6.283185307179586 * p / 8.0;
+}
+
+fn tw8_re(mk: u64) -> (result: f64) {
+    return cos(tw8_angle(mk));
+}
+
+fn tw8_im(mk: u64) -> (result: f64) {
+    return sin(tw8_angle(mk));
+}
+
+// ---- generic cores (arrays stay module-internal) ----
+
+fn dft4_core_re(xr: [f64; 4], xi: [f64; 4], m: u64) -> (result: f64) {
+    iterate k over xr carrying acc: f64 = 0.0 {
+        next acc = acc + xr[k] * tw4_re(mod4_small(m * k)) - xi[k] * tw4_im(mod4_small(m * k));
+    }
+    return acc;
+}
+
+fn dft4_core_im(xr: [f64; 4], xi: [f64; 4], m: u64) -> (result: f64) {
+    iterate k over xr carrying acc: f64 = 0.0 {
+        next acc = acc + xi[k] * tw4_re(mod4_small(m * k)) + xr[k] * tw4_im(mod4_small(m * k));
+    }
+    return acc;
+}
+
+fn idft4_core_re(xr: [f64; 4], xi: [f64; 4], m: u64) -> (result: f64) {
+    iterate k over xr carrying acc: f64 = 0.0 {
+        next acc = acc + xr[k] * tw4_re(mod4_small(m * k)) + xi[k] * tw4_im(mod4_small(m * k));
+    }
+    return acc / 4.0;
+}
+
+fn idft4_core_im(xr: [f64; 4], xi: [f64; 4], m: u64) -> (result: f64) {
+    iterate k over xr carrying acc: f64 = 0.0 {
+        next acc = acc + xi[k] * tw4_re(mod4_small(m * k)) - xr[k] * tw4_im(mod4_small(m * k));
+    }
+    return acc / 4.0;
+}
+
+fn dft8r_core_re(x: [f64; 8], m: u64) -> (result: f64) {
+    iterate k over x carrying acc: f64 = 0.0 {
+        next acc = acc + x[k] * tw8_re(m * k);
+    }
+    return acc;
+}
+
+fn dft8r_core_im(x: [f64; 8], m: u64) -> (result: f64) {
+    iterate k over x carrying acc: f64 = 0.0 {
+        next acc = acc + x[k] * tw8_im(m * k);
+    }
+    return acc;
+}
+
+// ---- flat corpus envelopes ----
+
+fn dft4_bin_re(xr0: f64, xr1: f64, xr2: f64, xr3: f64, xi0: f64, xi1: f64, xi2: f64, xi3: f64, m: u64) -> (result: f64) {
+    let xr: [f64; 4] = [xr0, xr1, xr2, xr3];
+    let xi: [f64; 4] = [xi0, xi1, xi2, xi3];
+    return dft4_core_re(xr, xi, m);
+}
+
+fn dft4_bin_im(xr0: f64, xr1: f64, xr2: f64, xr3: f64, xi0: f64, xi1: f64, xi2: f64, xi3: f64, m: u64) -> (result: f64) {
+    let xr: [f64; 4] = [xr0, xr1, xr2, xr3];
+    let xi: [f64; 4] = [xi0, xi1, xi2, xi3];
+    return dft4_core_im(xr, xi, m);
+}
+
+fn idft4_bin_re(xr0: f64, xr1: f64, xr2: f64, xr3: f64, xi0: f64, xi1: f64, xi2: f64, xi3: f64, m: u64) -> (result: f64) {
+    let xr: [f64; 4] = [xr0, xr1, xr2, xr3];
+    let xi: [f64; 4] = [xi0, xi1, xi2, xi3];
+    return idft4_core_re(xr, xi, m);
+}
+
+fn idft4_bin_im(xr0: f64, xr1: f64, xr2: f64, xr3: f64, xi0: f64, xi1: f64, xi2: f64, xi3: f64, m: u64) -> (result: f64) {
+    let xr: [f64; 4] = [xr0, xr1, xr2, xr3];
+    let xi: [f64; 4] = [xi0, xi1, xi2, xi3];
+    return idft4_core_im(xr, xi, m);
+}
+
+fn dft8r_bin_re(x0: f64, x1: f64, x2: f64, x3: f64, x4: f64, x5: f64, x6: f64, x7: f64, m: u64) -> (result: f64) {
+    let x: [f64; 8] = [x0, x1, x2, x3, x4, x5, x6, x7];
+    return dft8r_core_re(x, m);
+}
+
+fn dft8r_bin_im(x0: f64, x1: f64, x2: f64, x3: f64, x4: f64, x5: f64, x6: f64, x7: f64, m: u64) -> (result: f64) {
+    let x: [f64; 8] = [x0, x1, x2, x3, x4, x5, x6, x7];
+    return dft8r_core_im(x, m);
+}
+
+// Tolerance windows for libm-dependent bins: the comparison executes in
+// MNCS so corpus expectations stay exact booleans.
+fn dft8r_within_re(x0: f64, x1: f64, x2: f64, x3: f64, x4: f64, x5: f64, x6: f64, x7: f64, m: u64, expected: f64, tol: f64) -> (result: bool) {
+    return within_tol(dft8r_bin_re(x0, x1, x2, x3, x4, x5, x6, x7, m), expected, tol);
+}
+
+fn dft8r_within_im(x0: f64, x1: f64, x2: f64, x3: f64, x4: f64, x5: f64, x6: f64, x7: f64, m: u64, expected: f64, tol: f64) -> (result: bool) {
+    return within_tol(dft8r_bin_im(x0, x1, x2, x3, x4, x5, x6, x7, m), expected, tol);
+}

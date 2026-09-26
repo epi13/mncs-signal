@@ -1,0 +1,109 @@
+mncs 0.18;
+
+// mncs.signal.types — sampled-signal descriptors and complex-f64 DSP arithmetic.
+//
+// A signal is sampled data with an explicit timebase: rate, channel count,
+// and length travel with the samples, never as ambient context. Complex
+// values are plain f64 pairs; the operations below are total over finite
+// inputs (non-finite inputs trap per the float tier rule — they are never
+// silently normalized).
+//
+// Corpus entry points take and return flat f64/u64 scalars: the execution
+// boundary transports scalars exactly (floats as bit patterns). Record
+// forms exist for in-language composition and are proven by mncs test.
+module mncs.signal.types;
+
+enum SignalStatus { Ok, BadRate, BadChannels, BadLength }
+
+record SignalDesc { rate_hz: u64, channels: u64, length: u64 }
+
+record C64 { re: f64, im: f64 }
+
+// Validation priority is part of the contract: rate, then channels, then
+// length. A zero in an earlier field masks later fields.
+fn validate_descriptor(rate_hz: u64, channels: u64, length: u64) -> (result: SignalStatus) {
+    if rate_hz == 0 {
+        return SignalStatus.BadRate;
+    }
+    if channels == 0 {
+        return SignalStatus.BadChannels;
+    }
+    if length == 0 {
+        return SignalStatus.BadLength;
+    }
+    return SignalStatus.Ok;
+}
+
+fn status_code(status: SignalStatus) -> (result: u64) {
+    return match status {
+        Ok => 0,
+        BadRate => 1,
+        BadChannels => 2,
+        BadLength => 3,
+    };
+}
+
+fn c_make(re: f64, im: f64) -> (result: C64) {
+    return C64 { re: re, im: im };
+}
+
+fn c_add(a: C64, b: C64) -> (result: C64) {
+    return C64 { re: a.re + b.re, im: a.im + b.im };
+}
+
+fn c_sub(a: C64, b: C64) -> (result: C64) {
+    return C64 { re: a.re - b.re, im: a.im - b.im };
+}
+
+fn c_mul(a: C64, b: C64) -> (result: C64) {
+    return C64 { re: a.re * b.re - a.im * b.im, im: a.re * b.im + a.im * b.re };
+}
+
+fn c_conj(a: C64) -> (result: C64) {
+    return C64 { re: a.re, im: 0.0 - a.im };
+}
+
+fn c_scale(a: C64, factor: f64) -> (result: C64) {
+    return C64 { re: a.re * factor, im: a.im * factor };
+}
+
+fn c_norm2(a: C64) -> (result: f64) {
+    return a.re * a.re + a.im * a.im;
+}
+
+// ---- flat corpus envelopes (one scalar result per entry) ----
+
+fn c_add_re(a_re: f64, a_im: f64, b_re: f64, b_im: f64) -> (result: f64) {
+    return a_re + b_re;
+}
+
+fn c_add_im(a_re: f64, a_im: f64, b_re: f64, b_im: f64) -> (result: f64) {
+    return a_im + b_im;
+}
+
+fn c_mul_re(a_re: f64, a_im: f64, b_re: f64, b_im: f64) -> (result: f64) {
+    return a_re * b_re - a_im * b_im;
+}
+
+fn c_mul_im(a_re: f64, a_im: f64, b_re: f64, b_im: f64) -> (result: f64) {
+    return a_re * b_im + a_im * b_re;
+}
+
+fn c_conj_im(a_re: f64, a_im: f64) -> (result: f64) {
+    return 0.0 - a_im;
+}
+
+fn c_norm2_flat(a_re: f64, a_im: f64) -> (result: f64) {
+    return a_re * a_re + a_im * a_im;
+}
+
+// Tolerance comparison for libm/host-dependent values (twiddles, windows,
+// spectra). Exact-bit assertions cover libm-free paths; this covers the
+// rest without moving tolerance policy host-side. Uses numerics fabs via
+// the caller (kept dependency-free here by construction from comparison).
+fn within_tol(observed: f64, expected: f64, tol: f64) -> (result: bool) {
+    if observed >= expected {
+        return observed - expected <= tol;
+    }
+    return expected - observed <= tol;
+}

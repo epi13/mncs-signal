@@ -1,0 +1,68 @@
+mncs 0.18;
+
+// Proofs of mncs.signal.dft: exact DFT4/IDFT4 behavior (impulse, DC,
+// ramp against independently computed values), round-trip reconstruction,
+// reduction ladders, and real-input DFT8 exact cases. General DFT8 bins
+// go through tolerance windows fed by the numpy oracle in corpora.
+module tests.signal.dft_tests;
+
+use mncs.signal.dft;
+use mncs.signal.types;
+use mncs.test.assertions;
+use mncs.test.suite;
+
+test ladders_reduce() -> (result: TestResult) {
+    let a: bool = mod4_small(9) == 1;
+    let b: bool = a && mod4_small(3) == 3;
+    let c: bool = b && mod8_small(15) == 7;
+    let d: bool = c && mod8_small(8) == 0;
+    return from_assertion(equals_bool(true, d, 7201));
+}
+
+test dft4_impulse_is_flat() -> (result: TestResult) {
+    let a: bool = dft4_bin_re(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0) == 1.0;
+    let b: bool = a && dft4_bin_re(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3) == 1.0;
+    let c: bool = b && dft4_bin_im(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 2) == 0.0;
+    return from_assertion(equals_bool(true, c, 7202));
+}
+
+test dft4_dc() -> (result: TestResult) {
+    let a: bool = dft4_bin_re(1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0) == 4.0;
+    let b: bool = a && dft4_bin_re(1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1) == 0.0;
+    let c: bool = b && dft4_bin_im(1.0, 1.0, 1.0, 1.0, 0.0, 0.0, 0.0, 0.0, 2) == 0.0;
+    return from_assertion(equals_bool(true, c, 7203));
+}
+
+test dft4_ramp_matches_oracle() -> (result: TestResult) {
+    // Independent values: DFT([1,2,3,4]) = [10, -2+2i, -2, -2-2i].
+    let a: bool = dft4_bin_re(1.0, 2.0, 3.0, 4.0, 0.0, 0.0, 0.0, 0.0, 0) == 10.0;
+    let b: bool = a && dft4_bin_re(1.0, 2.0, 3.0, 4.0, 0.0, 0.0, 0.0, 0.0, 1) == 0.0 - 2.0;
+    let c: bool = b && dft4_bin_im(1.0, 2.0, 3.0, 4.0, 0.0, 0.0, 0.0, 0.0, 1) == 2.0;
+    let d: bool = c && dft4_bin_re(1.0, 2.0, 3.0, 4.0, 0.0, 0.0, 0.0, 0.0, 2) == 0.0 - 2.0;
+    let e: bool = d && dft4_bin_im(1.0, 2.0, 3.0, 4.0, 0.0, 0.0, 0.0, 0.0, 3) == 0.0 - 2.0;
+    return from_assertion(equals_bool(true, e, 7204));
+}
+
+test idft4_reconstructs_ramp() -> (result: TestResult) {
+    // IDFT of the ramp spectrum is the ramp, exactly (dyadic arithmetic).
+    let a: bool = idft4_bin_re(10.0, 0.0 - 2.0, 0.0 - 2.0, 0.0 - 2.0, 0.0, 2.0, 0.0, 0.0 - 2.0, 0) == 1.0;
+    let b: bool = a && idft4_bin_re(10.0, 0.0 - 2.0, 0.0 - 2.0, 0.0 - 2.0, 0.0, 2.0, 0.0, 0.0 - 2.0, 3) == 4.0;
+    let c: bool = b && idft4_bin_im(10.0, 0.0 - 2.0, 0.0 - 2.0, 0.0 - 2.0, 0.0, 2.0, 0.0, 0.0 - 2.0, 1) == 0.0;
+    return from_assertion(equals_bool(true, c, 7205));
+}
+
+test dft8r_impulse_and_dc_exact() -> (result: TestResult) {
+    let a: bool = dft8r_bin_re(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5) == 1.0;
+    let b: bool = a && dft8r_bin_im(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 5) == 0.0;
+    let c: bool = b && dft8r_bin_re(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0) == 8.0;
+    let d: bool = c && dft8r_bin_re(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 4) == 0.0;
+    return from_assertion(equals_bool(true, d, 7206));
+}
+
+test twiddle_exact_spots() -> (result: TestResult) {
+    let a: bool = tw4_re(0) == 1.0;
+    let b: bool = a && tw4_im(1) == 0.0 - 1.0;
+    let c: bool = b && within_tol(tw8_re(0), 1.0, 0.000000000001);
+    let d: bool = c && within_tol(tw8_im(2), 0.0 - 1.0, 0.000000000001);
+    return from_assertion(equals_bool(true, d, 7207));
+}

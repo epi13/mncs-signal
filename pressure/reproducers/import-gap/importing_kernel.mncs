@@ -1,0 +1,7 @@
+mncs 0.18;
+// Reproducer for SIG-PRESS-001: cross-repo import on the experiment path.
+module sig.import_probe;
+use mncs.numerics.scalar_float;
+fn probe_sqrt(x: f64) -> (result: f64) {
+    return sqrt_value(x);
+}

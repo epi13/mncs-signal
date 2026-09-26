@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  signal:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Checkout pinned family sources
+        uses: actions/checkout@v4
+        with:
+          # Pinned below; bump only with a Signal toolchain revision change.
+          repository: epi13/mncs-language
+          ref: 066897e97a8499a25ea33611d47cc7a4fcdc2b48
+          path: .dependencies/mncs-language
+      - uses: actions/checkout@v4
+        with:
+          repository: epi13/mncs-math
+          ref: 8a52fa37bfaa7e95ca05d5972ece4dc4a03f2fe9
+          path: .dependencies/mncs-math
+      - uses: actions/checkout@v4
+        with:
+          repository: epi13/mncs-numerics
+          ref: 2a76bb97bf3859f9b83156837bbb5d7948f148ca
+          path: .dependencies/mncs-numerics
+      - uses: actions/checkout@v4
+        with:
+          repository: epi13/mncs-test
+          ref: 028f333ffcf76b6706a17552549727ecb33f3cbf
+          path: .dependencies/mncs-test
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install numpy oracle
+        run: python -m pip install 'numpy==2.4.2'
+      - name: Provision pinned MNCS executor
+        run: |
+          python scripts/fetch_mncs_executor.py --dest '${{ runner.temp }}/mncs-bin/mncs-executor'
+          echo "MNCS_EXECUTOR=${{ runner.temp }}/mncs-bin/mncs-executor" >> "$GITHUB_ENV"
+      - name: Ruff
+        run: ruff check scripts tests
+      - name: Host tests
+        run: python -m pytest tests/test_signal.py -q -p no:cacheprovider
+      - name: Enforcement boundary
+        run: python scripts/signal_check.py
+        env:
+          MNCS_MATH_SRC: ${{ github.workspace }}/.dependencies/mncs-math/src
+          MNCS_NUMERICS_SRC: ${{ github.workspace }}/.dependencies/mncs-numerics/src
+          MNCS_TEST_NATIVE: ${{ github.workspace }}/.dependencies/mncs-test/native
+          MNCS_LANGUAGE_LIBRARY: ${{ github.workspace }}/.dependencies/mncs-language/library
