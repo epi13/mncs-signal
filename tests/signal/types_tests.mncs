@@ -1,0 +1,63 @@
+mncs 0.18;
+
+// Proofs of mncs.signal.types: descriptor validation (table + priority),
+// complex-f64 identities, and the tolerance predicate. Exact-bit cases
+// use ==; libm-adjacent reasoning uses within_tol only.
+module tests.signal.types_tests;
+
+use mncs.signal.types;
+use mncs.test.assertions;
+use mncs.test.suite;
+
+test descriptor_ok() -> (result: TestResult) {
+    return from_assertion(equals_i64(0, status_code(validate_descriptor(44100, 2, 1024)) as i64, 7101));
+}
+
+test descriptor_rejects_zeros() -> (result: TestResult) {
+    let a: bool = status_code(validate_descriptor(0, 2, 1024)) == 1;
+    let b: bool = a && status_code(validate_descriptor(44100, 0, 1024)) == 2;
+    let c: bool = b && status_code(validate_descriptor(44100, 2, 0)) == 3;
+    return from_assertion(equals_bool(true, c, 7102));
+}
+
+test descriptor_priority_rate_first() -> (result: TestResult) {
+    return from_assertion(equals_i64(1, status_code(validate_descriptor(0, 0, 0)) as i64, 7103));
+}
+
+test complex_add_sub() -> (result: TestResult) {
+    let s: C64 = c_add(C64 { re: 1.0, im: 2.0 }, C64 { re: 3.0, im: 4.0 });
+    let d: C64 = c_sub(s, C64 { re: 3.0, im: 4.0 });
+    return from_assertion(equals_bool(true, s.re == 4.0 && s.im == 6.0 && d.re == 1.0 && d.im == 2.0, 7104));
+}
+
+test complex_mul_imaginary_unit() -> (result: TestResult) {
+    // i * i = -1, exactly.
+    let p: C64 = c_mul(C64 { re: 0.0, im: 1.0 }, C64 { re: 0.0, im: 1.0 });
+    return from_assertion(equals_bool(true, p.re == 0.0 - 1.0 && p.im == 0.0, 7105));
+}
+
+test complex_conj_norm_scale() -> (result: TestResult) {
+    let a: C64 = C64 { re: 3.0, im: 4.0 };
+    let c: C64 = c_conj(a);
+    let n: f64 = c_norm2(a);
+    let s: C64 = c_scale(a, 2.0);
+    return from_assertion(equals_bool(true, c.im == 0.0 - 4.0 && n == 25.0 && s.re == 6.0 && s.im == 8.0, 7106));
+}
+
+test within_tol_accepts_near() -> (result: TestResult) {
+    return from_assertion(equals_bool(true, within_tol(1.0, 1.0 + 0.0000000000001, 0.000000001), 7107));
+}
+
+test within_tol_rejects_far() -> (result: TestResult) {
+    return from_assertion(equals_bool(false, within_tol(1.0, 1.5, 0.000000001), 7108));
+}
+
+test flat_envelopes_agree_with_records() -> (result: TestResult) {
+    let a: bool = c_add_re(1.0, 2.0, 3.0, 4.0) == 4.0;
+    let b: bool = a && c_add_im(1.0, 2.0, 3.0, 4.0) == 6.0;
+    let c: bool = b && c_mul_re(0.0, 1.0, 0.0, 1.0) == 0.0 - 1.0;
+    let d: bool = c && c_mul_im(0.0, 1.0, 0.0, 1.0) == 0.0;
+    let e: bool = d && c_conj_im(3.0, 4.0) == 0.0 - 4.0;
+    let f: bool = e && c_norm2_flat(3.0, 4.0) == 25.0;
+    return from_assertion(equals_bool(true, f, 7109));
+}

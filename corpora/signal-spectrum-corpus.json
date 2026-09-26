@@ -1,0 +1,261 @@
+{
+ "schema_version": "0.1",
+ "name": "signal-spectrum",
+ "cases": [
+  {
+   "id": "mag2-34",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.spectrum",
+     "function": "mag2"
+    },
+    "arguments": [
+     {
+      "float": {
+       "bits": 4613937818241073152,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4616189618054758400,
+       "type": {
+        "bits": 64
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "float": {
+      "bits": 4627730092099895296,
+      "type": {
+       "bits": 64
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "mag-34",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.spectrum",
+     "function": "mag_within"
+    },
+    "arguments": [
+     {
+      "float": {
+       "bits": 4613937818241073152,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4616189618054758400,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4617315517961601024,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4427486594234968593,
+       "type": {
+        "bits": 64
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "mag-bin1",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.spectrum",
+     "function": "mag_within"
+    },
+    "arguments": [
+     {
+      "float": {
+       "bits": 13839561654909534208,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4621625943704706534,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4622073854536511740,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4472406533629990549,
+       "type": {
+        "bits": 64
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "boolean": {
+      "value": true
+     }
+    }
+   ]
+  },
+  {
+   "id": "peak-first",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.spectrum",
+     "function": "peak_bin4"
+    },
+    "arguments": [
+     {
+      "float": {
+       "bits": 4607182418800017408,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4617315517961601024,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4617315517961601024,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4611686018427387904,
+       "type": {
+        "bits": 64
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "integer": {
+      "value": 1,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "peak-last",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.spectrum",
+     "function": "peak_bin4"
+    },
+    "arguments": [
+     {
+      "float": {
+       "bits": 4602678819172646912,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4598175219545276416,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4593671619917905920,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4606281698874543309,
+       "type": {
+        "bits": 64
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "integer": {
+      "value": 3,
+      "type": {
+       "bits": 64,
+       "signed": false
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

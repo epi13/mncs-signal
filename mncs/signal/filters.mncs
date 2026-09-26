@@ -1,0 +1,39 @@
+mncs 0.18;
+
+// mncs.signal.filters — time-domain FIR filtering and convolution.
+//
+// Direct-form FIR over explicit taps: no hidden state, no adaptation.
+// The generic dot product underneath covers any width the language can
+// express; the monomorphic envelopes are the corpus boundary. Correlation
+// is convolution with a reversed kernel — stated once, in one place.
+module mncs.signal.filters;
+
+fn dot_all<N: Nat>(x: [f64; N], h: [f64; N]) -> (result: f64) {
+    iterate i over x carrying acc: f64 = 0.0 {
+        next acc = acc + x[i] * h[i];
+    }
+    return acc;
+}
+
+// 4-tap direct-form FIR: y = sum h[i]*x[i].
+fn fir4(x0: f64, x1: f64, x2: f64, x3: f64, h0: f64, h1: f64, h2: f64, h3: f64) -> (result: f64) {
+    let x: [f64; 4] = [x0, x1, x2, x3];
+    let h: [f64; 4] = [h0, h1, h2, h3];
+    return dot_all<4>(x, h);
+}
+
+// 4-point moving average: the uniform-tap special case, stated explicitly
+// so its DC gain of exactly 1 is visible in the contract, not emergent.
+fn ma4(x0: f64, x1: f64, x2: f64, x3: f64) -> (result: f64) {
+    return fir4(x0, x1, x2, x3, 0.25, 0.25, 0.25, 0.25);
+}
+
+// Valid-mode convolution of a length-3 signal with a length-2 kernel:
+// two output lanes. Correlation with kernel k equals convolution with
+// the reversed kernel; callers reverse explicitly.
+fn conv32_bin(s0: f64, s1: f64, s2: f64, h0: f64, h1: f64, lane: u64) -> (result: f64) {
+    if lane == 0 {
+        return s0 * h0 + s1 * h1;
+    }
+    return s1 * h0 + s2 * h1;
+}

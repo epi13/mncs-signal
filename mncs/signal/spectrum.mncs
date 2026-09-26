@@ -1,0 +1,73 @@
+mncs 0.18;
+
+// mncs.signal.spectrum — magnitude spectra over f64.
+//
+// Power (magnitude-squared) is pure arithmetic and exact on the corpus
+// path. Magnitude needs sqrt, which lives in numerics (sqrt_value with an
+// explicit domain enum) and is proven through mncs test, not the corpus
+// boundary. Peak-pick over four lanes is an explicit comparison ladder:
+// the argmax contract (first maximum wins ties) is stated, not emergent.
+module mncs.signal.spectrum;
+
+use mncs.signal.types;
+
+// Local Newton square root. This mirrors numerics sqrt_newton deliberately
+// instead of importing it: cross-repo imports do not resolve on the
+// experiment-run path, so the iteration lives here, labeled, in branch
+// form (no select — select retains machine-intent obligations there).
+// Contract: x >= 0 (0 maps to 0); negative inputs yield 0.0 rather than a
+// domain enum, keeping the corpus boundary scalar. Verified against numpy
+// and cross-checked against numerics sqrt_value in mncs test.
+fn start_guess(x: f64) -> (result: f64) {
+    if x > 1.0 {
+        return x;
+    }
+    return 1.0;
+}
+
+fn sig_sqrt(x: f64) -> (result: f64) {
+    if x == 0.0 {
+        return 0.0;
+    }
+    if x < 0.0 {
+        return 0.0;
+    }
+    iterate step up_to 32 carrying y: f64 = start_guess(x) {
+        next y = 0.5 * (y + x / y);
+    }
+    return y;
+}
+
+fn mag2(re: f64, im: f64) -> (result: f64) {
+    return re * re + im * im;
+}
+
+fn mag_within(re: f64, im: f64, expected: f64, tol: f64) -> (result: bool) {
+    return within_tol(sig_sqrt(mag2(re, im)), expected, tol);
+}
+
+// Index of the first maximum lane. Ties resolve to the lowest index.
+fn peak_bin4(m0: f64, m1: f64, m2: f64, m3: f64) -> (result: u64) {
+    if m0 >= m1 {
+        if m0 >= m2 {
+            if m0 >= m3 {
+                return 0;
+            }
+            return 3;
+        }
+        if m2 >= m3 {
+            return 2;
+        }
+        return 3;
+    }
+    if m1 >= m2 {
+        if m1 >= m3 {
+            return 1;
+        }
+        return 3;
+    }
+    if m2 >= m3 {
+        return 2;
+    }
+    return 3;
+}

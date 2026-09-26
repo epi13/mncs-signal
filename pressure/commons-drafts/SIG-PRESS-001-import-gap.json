@@ -1,0 +1,69 @@
+{
+ "target": "tooling",
+ "domain": "execution.imports",
+ "capability": "cross-repo-use-on-experiment-path",
+ "title": "Cross-repo use imports fail on the experiment path (MNE173); numeric repos mirror canonical sources",
+ "summary": "mncs experiment run resolves use relative to the importing file only, so any kernel importing mncs.math.* or mncs.numerics.* fails with MNE173 while the identical file passes mncs test. mncs-harness mirrored its verdict lattice and mncs-signal mirrors Newton sqrt for the same reason; mncs-numerics stays self-contained for it. One documented import mechanism for both paths is missing.",
+ "requiredBehavior": "A single documented use-resolution mechanism that works identically under mncs test and mncs experiment run, or an explicit diagnostic naming the path split at the use site.",
+ "reproducer": {
+  "signature": "mncs-signal:SIG-PRESS-001:experiment-import-gap",
+  "text": "Minimal importing kernel + exact-bit corpus fails MNE173 on experiment run; sibling-only control passes. See mncs-signal pressure/reproducers/import-gap/."
+ },
+ "severity": "major",
+ "discoveredBy": "mncs-signal",
+ "discoveredAt": "2026-09-26T06:11:26Z",
+ "legacyIds": [
+  "mncs-signal:SIG-PRESS-001"
+ ],
+ "affectedRepositories": [
+  "mncs-language",
+  "mncs-signal",
+  "mncs-harness",
+  "mncs-numerics"
+ ],
+ "languageProfile": "0.18",
+ "sourceRef": {
+  "kind": "repository-path",
+  "repository": "mncs-signal",
+  "revision": "292452f01934940829afcec63dc30b37cad8bc46",
+  "path": "pressure/reproducers/import-gap/"
+ },
+ "observation": {
+  "repository": "mncs-signal",
+  "observedAt": "2026-09-26T06:11:26Z",
+  "languageProfile": "0.18",
+  "compiler": {
+   "revision": "066897e97a8499a25ea33611d47cc7a4fcdc2b48",
+   "binary": "target/release/mncs"
+  },
+  "summary": "MNE173 reproduced at mncs-language 066897e; all 8 Signal kernels restructured to sibling-only imports and green on three backends.",
+  "reproduction": {
+   "status": "FAIL",
+   "instructions": "Run the reproducer kernel via mncs experiment run; observe MNE173 with no result written."
+  },
+  "evidence": [
+   {
+    "id": "mncs-signal:import-gap:mne173",
+    "status": "FAIL",
+    "summary": "Importing kernel exits 1 with MNE173 at the use line.",
+    "reference": "mncs-signal@292452f:pressure/reproducers/import-gap/"
+   },
+   {
+    "id": "mncs-signal:import-gap:sibling-control",
+    "status": "PASS",
+    "summary": "Sibling-only kernels: 85/85 cases met on wasm/bytecode/cranelift.",
+    "reference": "mncs-signal@292452f:scripts/signal_check.py"
+   },
+   {
+    "id": "mncs-signal:import-gap:sqrt-mirror",
+    "status": "PASS",
+    "summary": "sig_sqrt agrees with numerics sqrt_value in-process (test 7408); corpus path stays import-free.",
+    "reference": "mncs-signal@292452f:mncs/signal/spectrum.mncs"
+   }
+  ],
+  "workaround": {
+   "removed": false,
+   "description": "Sibling-only imports + labeled sig_sqrt mirror; removable when the resolver unifies."
+  }
+ }
+}

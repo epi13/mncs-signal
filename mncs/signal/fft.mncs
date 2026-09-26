@@ -1,0 +1,73 @@
+mncs 0.18;
+
+// mncs.signal.fft — radix-2 decimation-in-time FFT over real f64 input.
+//
+// The composition proof of the library: the structured butterfly network
+// must agree with the direct DFT (within libm tolerance — twiddles are
+// host libm). N=8, one radix step: DFT4 of evens, DFT4 of odds, combine
+// with W8^m. Bit-reversal is the fixed even/odd split, stated explicitly.
+module mncs.signal.fft;
+
+use mncs.signal.dft;
+use mncs.signal.types;
+
+fn m4_of(m: u64) -> (result: u64) {
+    if m >= 4 {
+        return m - 4;
+    }
+    return m;
+}
+
+fn fft8r_core_re(x: [f64; 8], m: u64) -> (result: f64) {
+    let evens_r: [f64; 4] = [x[0], x[2], x[4], x[6]];
+    let odds_r: [f64; 4] = [x[1], x[3], x[5], x[7]];
+    let zeros: [f64; 4] = [0.0, 0.0, 0.0, 0.0];
+    let m4: u64 = m4_of(m);
+    let a_re: f64 = dft4_core_re(evens_r, zeros, m4);
+    let b_re: f64 = dft4_core_re(odds_r, zeros, m4);
+    let b_im: f64 = dft4_core_im(odds_r, zeros, m4);
+    let w_re: f64 = tw8_re(m);
+    let w_im: f64 = tw8_im(m);
+    return a_re + w_re * b_re - w_im * b_im;
+}
+
+fn fft8r_core_im(x: [f64; 8], m: u64) -> (result: f64) {
+    let evens_r: [f64; 4] = [x[0], x[2], x[4], x[6]];
+    let odds_r: [f64; 4] = [x[1], x[3], x[5], x[7]];
+    let zeros: [f64; 4] = [0.0, 0.0, 0.0, 0.0];
+    let m4: u64 = m4_of(m);
+    let a_im: f64 = dft4_core_im(evens_r, zeros, m4);
+    let b_re: f64 = dft4_core_re(odds_r, zeros, m4);
+    let b_im: f64 = dft4_core_im(odds_r, zeros, m4);
+    let w_re: f64 = tw8_re(m);
+    let w_im: f64 = tw8_im(m);
+    return a_im + w_re * b_im + w_im * b_re;
+}
+
+fn fft8r_bin_re(x0: f64, x1: f64, x2: f64, x3: f64, x4: f64, x5: f64, x6: f64, x7: f64, m: u64) -> (result: f64) {
+    let x: [f64; 8] = [x0, x1, x2, x3, x4, x5, x6, x7];
+    return fft8r_core_re(x, m);
+}
+
+fn fft8r_bin_im(x0: f64, x1: f64, x2: f64, x3: f64, x4: f64, x5: f64, x6: f64, x7: f64, m: u64) -> (result: f64) {
+    let x: [f64; 8] = [x0, x1, x2, x3, x4, x5, x6, x7];
+    return fft8r_core_im(x, m);
+}
+
+fn fft8r_within_re(x0: f64, x1: f64, x2: f64, x3: f64, x4: f64, x5: f64, x6: f64, x7: f64, m: u64, expected: f64, tol: f64) -> (result: bool) {
+    return within_tol(fft8r_bin_re(x0, x1, x2, x3, x4, x5, x6, x7, m), expected, tol);
+}
+
+fn fft8r_within_im(x0: f64, x1: f64, x2: f64, x3: f64, x4: f64, x5: f64, x6: f64, x7: f64, m: u64, expected: f64, tol: f64) -> (result: bool) {
+    return within_tol(fft8r_bin_im(x0, x1, x2, x3, x4, x5, x6, x7, m), expected, tol);
+}
+
+// Direct DFT/FFT agreement on one bin, decided in MNCS: the composition
+// proof as an executable predicate.
+fn dft_fft_agree_re(x0: f64, x1: f64, x2: f64, x3: f64, x4: f64, x5: f64, x6: f64, x7: f64, m: u64, tol: f64) -> (result: bool) {
+    return within_tol(fft8r_bin_re(x0, x1, x2, x3, x4, x5, x6, x7, m), dft8r_bin_re(x0, x1, x2, x3, x4, x5, x6, x7, m), tol);
+}
+
+fn dft_fft_agree_im(x0: f64, x1: f64, x2: f64, x3: f64, x4: f64, x5: f64, x6: f64, x7: f64, m: u64, tol: f64) -> (result: bool) {
+    return within_tol(fft8r_bin_im(x0, x1, x2, x3, x4, x5, x6, x7, m), dft8r_bin_im(x0, x1, x2, x3, x4, x5, x6, x7, m), tol);
+}

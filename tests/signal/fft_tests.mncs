@@ -1,0 +1,38 @@
+mncs 0.18;
+
+// Proofs of mncs.signal.fft: the radix-2 composition agrees with the
+// direct DFT (exact on impulse/DC, tolerance-windowed otherwise), and the
+// in-MNCS agreement predicate decides correctly.
+module tests.signal.fft_tests;
+
+use mncs.signal.fft;
+use mncs.signal.dft;
+use mncs.signal.types;
+use mncs.test.assertions;
+use mncs.test.suite;
+
+test fft8r_impulse_exact() -> (result: TestResult) {
+    let a: bool = fft8r_bin_re(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 3) == 1.0;
+    let b: bool = a && fft8r_bin_im(1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 6) == 0.0;
+    return from_assertion(equals_bool(true, b, 7501));
+}
+
+test fft8r_dc_exact() -> (result: TestResult) {
+    let a: bool = fft8r_bin_re(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 0) == 8.0;
+    let b: bool = a && fft8r_bin_re(1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 4) == 0.0;
+    return from_assertion(equals_bool(true, b, 7502));
+}
+
+test fft_matches_dft_on_ramp() -> (result: TestResult) {
+    // Agreement predicate on a general input, tight tolerance.
+    let a: bool = dft_fft_agree_re(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 1, 0.000000001);
+    let b: bool = a && dft_fft_agree_im(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 5, 0.000000001);
+    return from_assertion(equals_bool(true, b, 7503));
+}
+
+test fft_bins_within_oracle() -> (result: TestResult) {
+    // Independent numpy values for FFT([1..8]): bin 1 and bin 5.
+    let a: bool = fft8r_within_re(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 1, 0.0 - 4.0, 0.000000001);
+    let b: bool = a && fft8r_within_im(1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 1, 9.656854249492381, 0.000000001);
+    return from_assertion(equals_bool(true, b, 7504));
+}

@@ -1,0 +1,25 @@
+mncs 0.18;
+
+// mncs.signal.resample — sample-rate conversion primitives.
+//
+// Linear interpolation for upsampling, decimation for downsampling.
+// Both are stateless per-output-lane functions: framing policy (which
+// lanes exist, what happens at edges) belongs to the caller, not to a
+// hidden stream state. Higher-order (cubic/sinc) conversion is out of
+// scope until a consumer demonstrates the need.
+module mncs.signal.resample;
+
+// Linear interpolation at fraction t in [0, 1]: exact at the endpoints.
+fn lerp(a: f64, b: f64, t: f64) -> (result: f64) {
+    return a + (b - a) * t;
+}
+
+// Upsample-by-2 midpoint lane between two adjacent samples.
+fn up2_mid(a: f64, b: f64) -> (result: f64) {
+    return lerp(a, b, 0.5);
+}
+
+// Decimate-by-2 needs no kernel: keeping the even lane is an indexing
+// decision, and any required anti-alias filter composes explicitly from
+// mncs.signal.filters. A decimation helper that merely returns its first
+// argument would pretend policy is computation.

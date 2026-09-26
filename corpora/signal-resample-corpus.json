@@ -1,0 +1,186 @@
+{
+ "schema_version": "0.1",
+ "name": "signal-resample",
+ "cases": [
+  {
+   "id": "lerp-lo",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.resample",
+     "function": "lerp"
+    },
+    "arguments": [
+     {
+      "float": {
+       "bits": 4611686018427387904,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4618441417868443648,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 0,
+       "type": {
+        "bits": 64
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "float": {
+      "bits": 4611686018427387904,
+      "type": {
+       "bits": 64
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "lerp-hi",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.resample",
+     "function": "lerp"
+    },
+    "arguments": [
+     {
+      "float": {
+       "bits": 4611686018427387904,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4618441417868443648,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4607182418800017408,
+       "type": {
+        "bits": 64
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "float": {
+      "bits": 4618441417868443648,
+      "type": {
+       "bits": 64
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "lerp-quarter",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.resample",
+     "function": "lerp"
+    },
+    "arguments": [
+     {
+      "float": {
+       "bits": 4611686018427387904,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4618441417868443648,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4598175219545276416,
+       "type": {
+        "bits": 64
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "float": {
+      "bits": 4613937818241073152,
+      "type": {
+       "bits": 64
+      }
+     }
+    }
+   ]
+  },
+  {
+   "id": "up2-mid",
+   "request": {
+    "schema_version": "0.1",
+    "target": {
+     "module": "mncs.signal.resample",
+     "function": "up2_mid"
+    },
+    "arguments": [
+     {
+      "float": {
+       "bits": 4607182418800017408,
+       "type": {
+        "bits": 64
+       }
+      }
+     },
+     {
+      "float": {
+       "bits": 4613937818241073152,
+       "type": {
+        "bits": 64
+       }
+      }
+     }
+    ],
+    "step_budget": 16384
+   },
+   "expected": [
+    {
+     "float": {
+      "bits": 4611686018427387904,
+      "type": {
+       "bits": 64
+      }
+     }
+    }
+   ]
+  }
+ ]
+}

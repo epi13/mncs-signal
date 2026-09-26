@@ -1,0 +1,65 @@
+mncs 0.18;
+
+// mncs.signal.ring — bounded ring-buffer index discipline.
+//
+// A fixed-capacity delay line with no hidden state and no unbounded
+// history. The discipline is write-at-head-then-advance; the buffer
+// itself lives with the caller (these functions compute positions, and
+// the push/write tests compose them with plain array writes).
+//
+// Boundedness is structural: ages at or past capacity do not wrap, they
+// report INVALID (slot index == capacity). A consumer holding a stale age
+// fails loudly instead of reading a stranger's sample.
+module mncs.signal.ring;
+
+fn ring_cap() -> (result: u64) {
+    return 4;
+}
+
+// Successor on valid heads; INVALID (4) propagates instead of wrapping.
+// The head always names the most recent write, so age 0 reads head.
+fn ring_advance(head: u64) -> (result: u64) {
+    if head >= 4 {
+        return 4;
+    }
+    if head == 3 {
+        return 0;
+    }
+    return head + 1;
+}
+
+// Push transition: from empty (4) the first write lands in slot 0,
+// otherwise the head advances. Write the sample at the returned head.
+fn push_head(head: u64) -> (result: u64) {
+    if head >= 4 {
+        return 0;
+    }
+    return ring_advance(head);
+}
+
+// Slot holding the sample written `age` pushes ago (age 0 = most recent).
+// Returns 4 (INVALID) for ages past capacity or a corrupt head.
+fn ring_slot(head: u64, age: u64) -> (result: u64) {
+    if head >= 4 {
+        return 4;
+    }
+    if age >= 4 {
+        return 4;
+    }
+    if age == 0 {
+        return head;
+    }
+    if head >= age {
+        return head - age;
+    }
+    return head + 4 - age;
+}
+
+// Number of valid samples after `pushes` writes into an empty buffer:
+// saturates at capacity instead of growing.
+fn ring_count(pushes: u64) -> (result: u64) {
+    if pushes >= 4 {
+        return 4;
+    }
+    return pushes;
+}

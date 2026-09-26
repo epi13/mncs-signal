@@ -1,0 +1,34 @@
+mncs 0.18;
+
+// mncs.signal.windows — analysis windows over f64.
+//
+// Windows taper a finite frame before spectral analysis. Weights come
+// from host-libm cosine, so general weights are asserted through
+// tolerance windows; structural facts (Hann endpoints are exactly zero,
+// symmetry) are exact and asserted as bits.
+module mncs.signal.windows;
+
+use mncs.signal.types;
+
+fn cos_two_pi(n: u64, denom: u64) -> (result: f64) {
+    let angle: f64 = 6.283185307179586 * (n as f64) / (denom as f64);
+    return cos(angle);
+}
+
+// Hann weight w(n) = 0.5 * (1 - cos(2*pi*n/(N-1))), N >= 2.
+fn hann_weight(n: u64, len: u64) -> (result: f64) {
+    return 0.5 * (1.0 - cos_two_pi(n, len - 1));
+}
+
+// Hamming weight w(n) = 0.54 - 0.46 * cos(2*pi*n/(N-1)), N >= 2.
+fn hamming_weight(n: u64, len: u64) -> (result: f64) {
+    return 0.54 - 0.46 * cos_two_pi(n, len - 1);
+}
+
+fn hann_within(n: u64, len: u64, expected: f64, tol: f64) -> (result: bool) {
+    return within_tol(hann_weight(n, len), expected, tol);
+}
+
+fn hamming_within(n: u64, len: u64, expected: f64, tol: f64) -> (result: bool) {
+    return within_tol(hamming_weight(n, len), expected, tol);
+}

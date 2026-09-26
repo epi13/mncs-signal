@@ -1,0 +1,11 @@
+{
+ "schema_version": "0.1",
+ "name": "sig-import-probe",
+ "cases": [
+  {"id": "sqrt4", "request": {"schema_version": "0.1",
+   "target": {"module": "sig.import_probe", "function": "probe_sqrt"},
+   "arguments": [{"float": {"bits": 4616189618054758400, "type": {"bits": 64}}}],
+   "step_budget": 1024},
+   "expected": [{"float": {"bits": 4613937818241073152, "type": {"bits": 64}}}]}
+ ]
+}

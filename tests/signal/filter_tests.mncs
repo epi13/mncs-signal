@@ -1,0 +1,38 @@
+mncs 0.18;
+
+// Proofs of mncs.signal.filters: impulse responses expose taps, the
+// moving average has exact unit DC gain, valid-mode convolution lanes,
+// and the correlation convention (reverse explicitly).
+module tests.signal.filter_tests;
+
+use mncs.signal.filters;
+use mncs.test.assertions;
+use mncs.test.suite;
+
+test fir4_impulse_exposes_taps() -> (result: TestResult) {
+    return from_assertion(equals_bool(true, fir4(1.0, 0.0, 0.0, 0.0, 0.5, 0.25, 0.125, 0.125) == 0.5, 7301));
+}
+
+test fir4_dc_gain() -> (result: TestResult) {
+    // Constant input reproduces the tap sum: 0.5+0.25+0.125+0.125 = 1.
+    return from_assertion(equals_bool(true, fir4(2.0, 2.0, 2.0, 2.0, 0.5, 0.25, 0.125, 0.125) == 2.0, 7302));
+}
+
+test ma4_smooths() -> (result: TestResult) {
+    let a: bool = ma4(1.0, 1.0, 1.0, 1.0) == 1.0;
+    let b: bool = a && ma4(0.0, 0.0, 0.0, 4.0) == 1.0;
+    return from_assertion(equals_bool(true, b, 7303));
+}
+
+test conv32_lanes() -> (result: TestResult) {
+    // [1,2,3] (*) [1,-1] valid = [1-2, 2-3] = [-1,-1].
+    let a: bool = conv32_bin(1.0, 2.0, 3.0, 1.0, 0.0 - 1.0, 0) == 0.0 - 1.0;
+    let b: bool = a && conv32_bin(1.0, 2.0, 3.0, 1.0, 0.0 - 1.0, 1) == 0.0 - 1.0;
+    return from_assertion(equals_bool(true, b, 7304));
+}
+
+test conv32_impulse_shifts_kernel() -> (result: TestResult) {
+    let a: bool = conv32_bin(0.0, 1.0, 0.0, 5.0, 7.0, 0) == 7.0;
+    let b: bool = a && conv32_bin(0.0, 1.0, 0.0, 5.0, 7.0, 1) == 5.0;
+    return from_assertion(equals_bool(true, b, 7305));
+}
