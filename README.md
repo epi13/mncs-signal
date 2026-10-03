@@ -1,5 +1,8 @@
 # mncs-signal
 
+<!-- MNCS:generated:begin -->
+<!-- MNCS:generated:end -->
+
 Sampled-signal DSP for MNCS, written in MNCS: descriptors with explicit
 timebases, complex-f64 arithmetic, DFT/IDFT/FFT, FIR filtering and
 convolution, windows, resampling, spectra, and a bounded ring-buffer
