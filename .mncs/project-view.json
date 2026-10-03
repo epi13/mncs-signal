@@ -1,0 +1,22 @@
+{
+  "capabilities": [
+    {
+      "contract": "sampled-signal-dsp",
+      "fingerprint_sources": [
+        "mncs/signal/"
+      ],
+      "kind": "mncs-library",
+      "stability": "experimental",
+      "version": "0.1"
+    }
+  ],
+  "dependencies": [],
+  "entry": [
+    "python3 scripts/signal_check.py"
+  ],
+  "purpose": "Sampled-signal DSP written in MNCS: descriptors with explicit timebases, complex-f64 arithmetic, DFT/IDFT/FFT, FIR filtering and convolution, windows, resampling, spectra, and a bounded ring-buffer discipline, verified against an independent numpy oracle.",
+  "repository": "mncs-signal",
+  "schema_version": "mncs.project-view/1",
+  "source_identity": "sha256:45ed5e1be431299c66c547733639f566dc072fe5071b94c1fd830a6aa722912f",
+  "structure": {}
+}

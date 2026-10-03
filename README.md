@@ -1,6 +1,19 @@
 # mncs-signal
 
 <!-- MNCS:generated:begin -->
+## Project entry
+
+Sampled-signal DSP written in MNCS: descriptors with explicit timebases, complex-f64 arithmetic, DFT/IDFT/FFT, FIR filtering and convolution, windows, resampling, spectra, and a bounded ring-buffer discipline, verified against an independent numpy oracle.
+
+```bash
+python3 scripts/signal_check.py
+```
+
+Declared capabilities (declarations do not establish execution health):
+
+- `sampled-signal-dsp/0.1` — mncs-library (experimental)
+
+Semantic sources and ownership: `.mncs/projections.json`.
 <!-- MNCS:generated:end -->
 
 Sampled-signal DSP for MNCS, written in MNCS: descriptors with explicit
