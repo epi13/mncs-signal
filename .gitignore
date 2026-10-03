@@ -8,5 +8,6 @@
 __pycache__/
 *.pyc
 
-# Tool cache
-.mncs/
+# Tool cache (narrowed: canonical .mncs projection sources commit)
+.mncs/cache/
+.mncs/doctor/

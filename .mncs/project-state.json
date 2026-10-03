@@ -1,0 +1,17 @@
+{
+  "schema_version": "mncs.project-intent/1",
+  "purpose": "Sampled-signal DSP written in MNCS: descriptors with explicit timebases, complex-f64 arithmetic, DFT/IDFT/FFT, FIR filtering and convolution, windows, resampling, spectra, and a bounded ring-buffer discipline, verified against an independent numpy oracle.",
+  "entry": [
+    "python3 scripts/signal_check.py"
+  ],
+  "milestones": [
+    {
+      "id": "mncs-signal:projection-conformance",
+      "title": "Declared ambient projection surfaces satisfy their contract",
+      "subject_slot": "declarations",
+      "evidence": "projection-conformance",
+      "dependencies": [],
+      "blockers": []
+    }
+  ]
+}
